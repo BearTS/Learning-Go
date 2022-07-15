@@ -1,48 +1,40 @@
 package routes
 
 import (
+	"Learning-Go/entity"
+	"Learning-Go/repository"
 	"encoding/json"
+	"math/rand"
 	"net/http"
 )
 
-type Post struct {
-	ID    int    `json:"id"`
-	Title string `json:"title"`
-	Text  string `json:"text"`
-}
-
 var (
-	posts []Post
+	repo repository.PostRepository = repository.NewPostRepository()
 )
-
-func init() {
-	posts = []Post{Post{ID: 1, Title: "Title 1", Text: "Text 1"}}
-}
 
 func GetPosts(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Content-type", "application/json")
-	result, error := json.Marshal(posts)
+	posts, error := repo.FindAll()
 	if error != nil {
 		resp.WriteHeader(http.StatusInternalServerError)
-		resp.Write([]byte(`{"error": "Error marshalling the posts array"}`))
+		resp.Write([]byte(`{"error": "Error Getting the Posts"}`))
 		return
 	}
 	resp.WriteHeader(http.StatusOK)
-	resp.Write(result)
+	json.NewEncoder(resp).Encode(posts)
 }
 
 func AddPost(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Content-type", "application/json")
-	var post Post
+	var post entity.Post
 	error := json.NewDecoder(req.Body).Decode(&post)
 	if error != nil {
 		resp.WriteHeader(http.StatusInternalServerError)
 		resp.Write([]byte(`{"error": "Error unmarshalling the posts array"}`))
 		return
 	}
-	post.ID = len(posts) + 1
-	posts = append(posts, post)
+	post.ID = rand.Int63()
+	repo.Save(&post)
 	resp.WriteHeader(http.StatusOK)
-	result, error := json.Marshal(posts)
-	resp.Write(result)
+	json.NewEncoder(resp).Encode(post)
 }
