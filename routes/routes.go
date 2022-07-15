@@ -1,4 +1,4 @@
-package main
+package routes
 
 import (
 	"encoding/json"
@@ -19,7 +19,7 @@ func init() {
 	posts = []Post{Post{ID: 1, Title: "Title 1", Text: "Text 1"}}
 }
 
-func getPosts(resp http.ResponseWriter, req *http.Request) {
+func GetPosts(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Content-type", "application/json")
 	result, error := json.Marshal(posts)
 	if error != nil {
@@ -31,7 +31,7 @@ func getPosts(resp http.ResponseWriter, req *http.Request) {
 	resp.Write(result)
 }
 
-func addPost(resp http.ResponseWriter, req *http.Request) {
+func AddPost(resp http.ResponseWriter, req *http.Request) {
 	resp.Header().Set("Content-type", "application/json")
 	var post Post
 	error := json.NewDecoder(req.Body).Decode(&post)
